@@ -1,0 +1,134 @@
+\documentclass{article}
+
+\usepackage[english]{babel}
+
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Quantum Denoising Project Report }
+\author{Mentee La Van Hoa - VNU-HCM High School for the Gifted \\
+Mentor Pham Nguyen Tam Minh - TU Delft \\
+Mentor Bach Gia Bao - University of Technology HCM\\
+Mentor Duong Dinh Trong - KAIST}
+
+
+\begin{document}
+\maketitle
+
+
+\section{Introduction}
+In this age, quantum computing is a hot field because of its computing efficiency that reduces significantly the computational and time resources. In this project, a quantum algorithm  is used to calculate Singular Value Decomposition (SVD). This can be applied in denoising images, sound and other signals. We also show one of the  applications of this algorithm in image processing.
+
+The problem is explained more in detail in the "Problem Formulation" section. The "Methods" section describes steps involved. And the results are included in the "Results" section. The "Conclusions" section contains discussion on the strengths and weaknesses of the method and some potential following up the research. 
+
+\section{Problem Formulation}
+Singular Value Decomposition (SVD) allows a matrix to be decomposed into singular values, left and right singular vectors. By using quantum computation techniques in this step, we hope to reduce the amount of time and computational resources. After that, we are able to see an application of  Singular Value Decomposition (SVD)  in reducing the noise of an image. 
+
+\section {Methods}
+\subsection{Singular Value Decomposition}
+\subsubsection{Circuit Construction}
+2 identical parametrized circuits are constructed from scratch. In each circuit, 4 qubits and 4 layers are used. Graphical representation of each layer is included in the figure below. This type of circuit among others is chosen because of its high expressiblity and high entangling capability, as demonstrated in Circuit Id 2 in the paper Expressibility and Entangling capability of parametrized quantum circuits for hybrid quantum-classical algorithms \cite{Sim_2019}.
+\bibliographystyle{plain}
+\bibliography{mybib}
+
+\begin{figure}
+\centering
+\includegraphics[]{circuit.png}
+\caption{Graphical representation of each layer, with P1[n] being the n-th parameter.}
+\end{figure}
+
+
+
+\subsubsection{Calculate the singular values}
+Singular values from the matrix will be calculated according to the formulas below, with A being the original matrix, r being the rank of this matrix A, d being the singular values, u and v being the left and right singular vectors.
+
+\begin{equation}
+    A = \sum_{j=1}^{r} d_{j}\ket{u_{j}} \bra{v_{j}}
+\end{equation}
+
+So
+\begin{equation}
+    d_{j}= \text{Re}(\bra{u_{j}}A\ket{v_{j}})
+\end{equation}
+
+
+\subsubsection{Optimization to find the parameters}
+As the two circuits are parametrized, these parameters must be found in such a way that the resulting singular values will be maximized (The higher the singular values, the better the information from the image it contains) using the Adam optimizer will be used. The function which is maximized is a weighted sum of a certain number of real singular values. 
+The parameters after being found will be fed back to the circuit. 
+
+The function which is optimized, with U, V being the matrix constructed from vectors $\{u,v\}$ as columns:
+
+\begin{equation}
+    F(\alpha,\beta)= \sum_{j=1}^{r} \text{Re}( \bra{\psi_{j}}U^T (\alpha) A V(\beta)\ket{\psi_{j}})
+\end{equation}
+
+
+
+\subsection{Applications in Image Processing}
+\subsubsection{Dataset}
+In this application, we want to take a simple example, so the MNIST (Modified National Institute of Standards and Technology) dataset is used. This is a dataset of 60000 small square 28x28 pixel images of handwritten single digits between 0 and 9. Specifically, the number 7 will be used among all because its figure is the simplest.
+
+\subsubsection{Data Preprocessing}
+Before SVD is applied to the image matrix, the image or data must be preprocessed. First, it is resized into 16x16 ($2^4$ x $2^4$) for we used 4 qubits each circuit. Then, it is converted from red-green-blue scale (RGB scale) to grayscale as we want all information in a matrix. Now, zero-mean additive white Gaussian noise (AWGN) is added to the image with a noise standard deviation of 0.05. 
+
+\begin{equation} g_{n}=g + n  \end{equation} 
+
+with g being the matrix representation of the image and n being the noise.
+
+\begin{figure}
+\centering
+\includegraphics[width = 0.4\textwidth]{blochsphere.png}
+\caption{For each circuit, 10 sample pairs of circuit parameter vectors were uniformly drawn, corresponding to 20 parametrized states that were plotted on the Bloch sphere.}
+\end{figure}
+
+\subsubsection{SVD}
+Now, the SVD steps in the section 3.1 are applied to the image. As the essential parts of the image are kept, we only want to retain a certain number of the highest singular values and their singular vectors. The rest will be abolished as they are considered noise. 
+
+\subsubsection{Image Reconstruction}
+From the retained singular values and their relative singular vectors, the image will be reconstructed using simple matrix multiplications.
+
+\section{Results}
+In order to present the results of this research, the metric norm distance will be used. The higher the norm distance, the worse the results of the methods. In Figure 3, the x-axis is the number of singular values used, or the number of singular values considered as essential parts of the image, the y-axis is the norm distance. Also, we want to investigate the potential of quantum computing so the results of the SVD (the conventional method using classical computation) and the QSVD (Quantum Singular Value Decomposition - the method presented in this project) are juxtaposed.
+
+\begin{figure}
+\centering
+\includegraphics[]{result.png}
+\caption{Comparison of SVD (the conventional method using classical computation) and QSVD (Quantum SVD- the method presented in this project) }
+\end{figure}
+
+Furthermore, we include 2 sample images with the number of singular values used being 10 (n=10) of the 2 methods to compare. 
+
+\begin{figure}[htp!]
+\centering
+\includegraphics[]{moreresult.png}
+\caption{Left: SVD method; Right: QSVD method}
+\end{figure}
+
+
+
+\section{Conclusion and Outlook}
+Because optimization or model training for finding the parameters is extremely costly, this method's time and computational resources are higher than the conventional method involving a classical computer. 
+
+In the future, we hope to try another method that does not use optimization, which uses Quantum Simulation and Quantum Phase Estimation. 
+
+\section{Personal lessons from the project}
+In this program, I have learnt about foundational knowledge about Calculus, Linear Algebra, Quantum Mechanics; Python and Qiskit programming languages; Jupyter Notebook; Machine Learning and Data Science; debugging skills; Image Processing.
+
+More than that, I have learnt priceless skills in self-studying via Internet and Youtube, finding resources, reading a research paper professionally, writing professional research reports, self-discipline and exercising regularly. These things will be valuable for me in my future career.
+
+\section{Code and other resources}
+\href{https://github.com/prohack17/quantum}{Code}
+
+\section{Acknowledgements}
+I would like to genuinely thank my mentors Pham Nguyen Tam Minh, Bach Gia Bao, and Duong Dinh Trong for helping me to conduct this project as well as being talented teachers for me throughout the program. 
+
+Besides, I would also like to thank the organizers Hoang Pham Gia Khang, Doan Thien Quy and PTNK STEAM CLUB. Without them, this program would not be carried out.
+
+\end{document}
